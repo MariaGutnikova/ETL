@@ -143,7 +143,17 @@ ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 <img width="1852" height="977" alt="image" src="https://github.com/user-attachments/assets/413c5fcc-2b33-40da-a575-acfd0e86b906" />
 
 ## Шаг 4 Выполнение доп заданий
+Общиий вид:
+<img width="1535" height="559" alt="image" src="https://github.com/user-attachments/assets/14610d1e-4d23-4f9d-8974-20ccfb642eee" />
 
+Выполнение задания 1:
+<img width="1847" height="983" alt="image" src="https://github.com/user-attachments/assets/e0b730ef-e40e-4d3d-96c7-8b20e11e0010" />
+
+Общиий вид 2:
+<img width="1844" height="987" alt="image" src="https://github.com/user-attachments/assets/1c3622f5-0df5-4cc7-8b86-e1455f2ff015" />
+
+Выполнение задания 2:
+<img width="1845" height="991" alt="image" src="https://github.com/user-attachments/assets/925aa0ab-3449-4faa-b9ec-287971fb812b" />
 
 
 ## Проверка данных

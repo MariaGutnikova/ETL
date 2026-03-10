@@ -42,7 +42,7 @@ Output:
 ### Для проверки наличия записей использовался такой скрипт: SELECT * FROM `invoices` LIMIT 100;
 <img width="1682" height="955" alt="image" src="https://github.com/user-attachments/assets/8ac154f4-519e-46b8-af32-c5fd4f5572a1" />
 
-### Для проверки количества записей использовался такой запрос: SELECT COUNT(*) FROM stock_prices;
+### Для проверки количества записей использовался такой запрос: SELECT COUNT(*) FROM invoices;
 <img width="1678" height="950" alt="image" src="https://github.com/user-attachments/assets/b67f17a8-b345-45ac-b09a-d688dec844a7" />
 
 

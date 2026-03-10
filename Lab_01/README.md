@@ -49,4 +49,4 @@ Output:
 ## Файлы:
 [Исходный CSV](https://cloud.mail.ru/public/GUeW/Sb3pvkD8u)
 
-[Файл трансформации]()
+[Файл трансформации](Lab_01/Lab_01.ktr)

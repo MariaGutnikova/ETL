@@ -90,44 +90,57 @@ ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 ## Шаг 2. Настройка Job (Главного задания)
 
 **Set Variables: Создайте переменную пути к файлу.**
+<img width="1852" height="987" alt="image" src="https://github.com/user-attachments/assets/62c994e7-8dc5-4be0-8f1d-e8ad00a259c2" />
+
 
 **Check File Exists: Проверка наличия файла ${CSV_FILE_PATH}.**
+<img width="1848" height="985" alt="image" src="https://github.com/user-attachments/assets/169d60a6-a06e-45f5-9771-745d702ab17b" />
 
 **HTTP (Download): Загрузка файла, если его нет.**
+<img width="1853" height="985" alt="image" src="https://github.com/user-attachments/assets/2accc96c-a455-416f-b977-4b0e47a19bba" />
 
 **Transformation. Последовательный вызов трех трансформаций для загрузки данных.**
+<img width="1626" height="893" alt="image" src="https://github.com/user-attachments/assets/d1612c55-e61b-4810-9f4d-7665e7bcbd17" />
 
 ## Шаг 3. Реализация Трансформаций (Transformations)
 ### Трансформация 1. Load Orders
 
 **Select Values. Установите типы данных (Date format: dd.MM.yyyy для дат, Integer для ID).**
+<img width="1853" height="990" alt="image" src="https://github.com/user-attachments/assets/dde45c57-5a72-4666-bb72-75783c6050f8" />
 
 **Memory Group By. Используется для дедупликации (группировка по row_id, взятие первых значений по остальным полям).**
+<img width="1856" height="997" alt="image" src="https://github.com/user-attachments/assets/b8527948-a064-4486-a15c-bcd36ed2d326" />
 
 **Filter Rows (Валидация)**
-* Условие: order_date IS NOT NULL AND ship_date IS NOT NULL AND reterned = YES.
+* Условие: order_date IS NOT NULL AND ship_date IS NOT NULL AND region = Central.
 * TRUE -> Table Output (в таблицу orders).
 * FALSE -> Write to Log (логирование ошибок).
+<img width="1084" height="718" alt="image" src="https://github.com/user-attachments/assets/3deab2a8-7f4a-43b7-aed9-f7b10b135cf7" />
 
 **Value Mapper. Преобразование поля Returned: Yes -> 1, No -> 0, Empty -> 0.**
+<img width="852" height="362" alt="image" src="https://github.com/user-attachments/assets/6770e134-035c-47b1-bfb8-e0f518aa4cae" />
 
 ### Трансформация 2. Load Customers
 
 **Select Values. Оставьте только поля, относящиеся к клиенту (customer_id, name, city и т.д.).**
+<img width="1552" height="812" alt="image" src="https://github.com/user-attachments/assets/d7158789-96e3-46fb-9470-f0557fea6961" />
 
 **Memory Group By. Группировка по customer_id (устранение дублей клиентов).**
+<img width="1134" height="835" alt="image" src="https://github.com/user-attachments/assets/b7a293bd-36cc-409a-ba94-3833a77070fb" />
 
 **Table Output. Загрузка в таблицу customers.**
+<img width="936" height="712" alt="image" src="https://github.com/user-attachments/assets/caabc273-0d46-4d9d-a960-03494fb22d29" />
 
 ### Трансформация 3. Load Products
 
 **Select Values. Оставьте поля продукта (product_id, category, name и т.д.).**
-
+<img width="1547" height="812" alt="image" src="https://github.com/user-attachments/assets/cc8114d9-adfd-4a2f-95ab-69d34f9cc719" />
 
 **Memory Group By. Группировка по product_id.**
-
+<img width="1853" height="986" alt="image" src="https://github.com/user-attachments/assets/20d0c068-c442-4aa5-8df7-86fa40aeeb38" />
 
 **Table Output. Загрузка в таблицу products.**
+<img width="1852" height="977" alt="image" src="https://github.com/user-attachments/assets/413c5fcc-2b33-40da-a575-acfd0e86b906" />
 
 ## Шаг 4 Выполнение доп заданий
 

@@ -159,17 +159,17 @@ ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 ## Проверка данных
 
 ### Для проверки наличия записей использовался такой скрипт: SELECT * FROM orders,customers,products LIMIT 100;
-<img width="1845" height="991" alt="image" src="/Files/Снимок%20экрана%202026-03-14%20110932.png" />
+<img width="1845" height="991" alt="image" src="Files/Снимок%20экрана%202026-03-14%20110932.png" />
 <img width="1845" height="991" alt="image" src="Files/Снимок%20экрана%202026-03-14%20111057.png" />
-<img width="1845" height="991" alt="image" src="/Files/Снимок%20экрана%202026-03-14%20111103.png" />
+<img width="1845" height="991" alt="image" src="Files/Снимок%20экрана%202026-03-14%20111103.png" />
 
 
 
 
 ### Для проверки количества записей использовался такой запрос: SELECT COUNT(*) FROM orders,customers,products;
-<img width="1845" height="991" alt="image" src="/Files/Снимок%20экрана%202026-03-14%20111149.png" />
-<img width="1845" height="991" alt="image" src="/Files/Снимок%20экрана%202026-03-14%20111208.png" />
-<img width="1845" height="991" alt="image" src="/Files/Снимок%20экрана%202026-03-14%20111220.png" />
+<img width="1845" height="991" alt="image" src="Files/Снимок%20экрана%202026-03-14%20111149.png" />
+<img width="1845" height="991" alt="image" src="Files/Снимок%20экрана%202026-03-14%20111208.png" />
+<img width="1845" height="991" alt="image" src="Files/Снимок%20экрана%202026-03-14%20111220.png" />
 
 
 

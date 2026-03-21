@@ -183,6 +183,11 @@ ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 
 [Файл Transformations customers](Files/lab_2_3_csv_to_products.ktr)
 
-[Файл задания 1](/Files/zadanie_1.ktr)
+[Файл задания 1](Files/zadanie_1%20(1).ktr)
 
-[Файл задания 2](Files/zadanie_2.ktr)
+[Файл задания 2](Files/zadanie_2%20(1).ktr)
+
+[Результат задания 1](Files/Zadanie_1.xls)
+
+[Результат задания 2](Files/Zadanie_2.xls)
+

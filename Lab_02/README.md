@@ -144,16 +144,16 @@ ALTER TABLE products CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci
 
 ## Шаг 4 Выполнение доп заданий
 Общиий вид:
-<img width="1535" height="559" alt="image" src="https://github.com/user-attachments/assets/14610d1e-4d23-4f9d-8974-20ccfb642eee" />
+<img width="1621" height="563" alt="image" src="https://github.com/user-attachments/assets/06972569-bece-4104-8ce5-83f1ad2f2d17" />
 
 Выполнение задания 1:
-<img width="1847" height="983" alt="image" src="https://github.com/user-attachments/assets/e0b730ef-e40e-4d3d-96c7-8b20e11e0010" />
+<img width="1852" height="986" alt="image" src="https://github.com/user-attachments/assets/bb8f5b4f-3c41-41c6-af0d-bebd4c0f6d3d" />
 
 Общиий вид 2:
-<img width="1844" height="987" alt="image" src="https://github.com/user-attachments/assets/1c3622f5-0df5-4cc7-8b86-e1455f2ff015" />
+<img width="1642" height="835" alt="image" src="https://github.com/user-attachments/assets/f75c70b3-7caf-46c0-994c-1af2054661cb" />
 
 Выполнение задания 2:
-<img width="1845" height="991" alt="image" src="https://github.com/user-attachments/assets/925aa0ab-3449-4faa-b9ec-287971fb812b" />
+<img width="1846" height="967" alt="image" src="https://github.com/user-attachments/assets/a9afc5d3-e3ce-4ba3-a912-63e67ea8d5b1" />
 
 
 ## Проверка данных

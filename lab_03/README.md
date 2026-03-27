@@ -193,12 +193,8 @@ ORDER BY total_payout DESC;
 SELECT department, employees_count, total_payout, avg_net_payout
 FROM view_payroll_by_department
 LIMIT 5;
-
--- Налоговая нагрузка
-SELECT department, gross_payout, total_taxes, tax_burden_pct
-FROM view_tax_burden
-ORDER BY tax_burden_pct DESC;
 ```
+<img width="1611" height="655" alt="image" src="https://github.com/user-attachments/assets/2d6100b6-ebfb-4b82-bd18-69980510a473" />
 
 ---
 

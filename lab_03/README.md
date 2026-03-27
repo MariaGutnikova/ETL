@@ -148,11 +148,32 @@ python scripts/generate_data_files.py
 
 ### Шаг 3. Создание целевых таблиц (MySQL)
 
-```bash
-# Подключиться к MySQL и выполнить скрипт
-mysql -h 95.131.149.21 -P 3306 -u YOUR_LOGIN -p mgpu_ico_etl_XX < sql/mysql_create_target_tables.sql
+```sql
+CREATE TABLE hr_payroll_final (
+    id              INT AUTO_INCREMENT PRIMARY KEY,
+    emp_id          INT            NOT NULL,
+    full_name       VARCHAR(300),
+    department      VARCHAR(100),
+    position        VARCHAR(100),
+    grade           VARCHAR(50),
+    base_salary     DECIMAL(12,2)  DEFAULT 0.00,
+    seniority_pct   DECIMAL(5,1)   DEFAULT 0.0,
+    regional_coeff  DECIMAL(4,2)   DEFAULT 1.00,
+    adjusted_salary DECIMAL(12,2)  DEFAULT 0.00,  
+    bonus_amount    DECIMAL(12,2)  DEFAULT 0.00,
+    bonus_type      VARCHAR(100),
+    total_payout    DECIMAL(12,2)  DEFAULT 0.00,  
+    tax_ndfl        DECIMAL(12,2)  DEFAULT 0.00,  
+    tax_pension     DECIMAL(12,2)  DEFAULT 0.00,  
+    tax_medical     DECIMAL(12,2)  DEFAULT 0.00,  
+    tax_social      DECIMAL(12,2)  DEFAULT 0.00,   
+    net_payout      DECIMAL(12,2)  DEFAULT 0.00,  
+    employer_cost   DECIMAL(12,2)  DEFAULT 0.00,   
+    processed_at    TIMESTAMP      DEFAULT CURRENT_TIMESTAMP
+);
 ```
 Результат создания БД в MYSQL:
+<img width="1618" height="521" alt="image" src="https://github.com/user-attachments/assets/09f0d9c0-83f8-4e40-8d20-f9ab74940e93" />
 
 ### Шаг 4. Запуск ETL в Pentaho (Spoon)
 
@@ -185,7 +206,7 @@ GROUP BY department
 ORDER BY total_payout DESC;
 ```
 Результат работы:
-
+<img width="1612" height="1044" alt="image" src="https://github.com/user-attachments/assets/5985af61-353a-4cf6-8c41-777f04c164ba" />
 
 ### Пример запроса к витрине
 
@@ -208,35 +229,19 @@ ORDER BY tax_burden_pct DESC;
 ### Схема трансформации в Pentaho
 
 Обшщий вид:
+<img width="1839" height="1046" alt="image" src="https://github.com/user-attachments/assets/c43cc7f9-08d5-4351-93ec-9b8bbe8db344" />
+
 
 ### Ключевые шаги
-
-| # | Шаг                | Описание                                              |
-|---|---------------------|-------------------------------------------------------|
-| 1 | **Table Input**     | `SELECT * FROM employees_info WHERE is_active = TRUE`  |
-| 2 | **Excel Input**     | Чтение `salaries_source.xlsx` (лист "Оклады")         |
-| 3 | **CSV Input**       | Чтение `bonuses_source.csv` (разделитель `;`)         |
-| 4 | **Merge Join 1**    | LEFT JOIN: PG + Excel по `emp_id`                     |
-| 5 | **Merge Join 2**    | LEFT JOIN: (PG+Excel) + CSV по `emp_id`               |
-| 6 | **Filter Rows**     | Удаление строк с `emp_id IS NULL`                     |
-| 7 | **Calculator/JS**   | Расчёт (см. формулы ниже)                             |
-| 8 | **Table Output**    | Запись в MySQL `hr_payroll_final` (batch = 10000)     |
-
-### Формулы расчётов
-
-```
-adjusted_salary = base_salary × (1 + seniority_pct / 100) × regional_coeff
-total_payout    = adjusted_salary + bonus_amount
-
-НДФЛ (13%)   : tax_ndfl    = total_payout × 0.13
-ПФР (22%)    : tax_pension  = total_payout × 0.22
-ОМС (5.1%)   : tax_medical  = total_payout × 0.051
-ФСС (2.9%)   : tax_social   = total_payout × 0.029
-
-net_payout    = total_payout − tax_ndfl          (на руки)
-employer_cost = total_payout + tax_pension + tax_medical + tax_social  (полная стоимость)
-```
----
+<img width="977" height="709" alt="image" src="https://github.com/user-attachments/assets/8454f86f-2276-4130-a63d-bcaeb1746cc6" />
+<img width="1259" height="621" alt="image" src="https://github.com/user-attachments/assets/579b87bc-3fb8-4606-8644-3778ab6de3f4" />
+<img width="892" height="721" alt="image" src="https://github.com/user-attachments/assets/1183c5f8-cb1d-4fd0-8e7a-53ed8cbb53b4" />
+<img width="393" height="366" alt="image" src="https://github.com/user-attachments/assets/62801fe8-53f1-4069-885c-29cc54fd2b7e" />
+<img width="756" height="387" alt="image" src="https://github.com/user-attachments/assets/301242cc-960f-484d-9af0-b61eb72db557" />
+<img width="1540" height="470" alt="image" src="https://github.com/user-attachments/assets/b23a66e0-6e4a-4077-aa56-f4b74f30afca" />
+<img width="984" height="1044" alt="image" src="https://github.com/user-attachments/assets/784a5bd0-d7f2-42e8-a3d1-03c523fde08d" />
+<img width="1543" height="852" alt="image" src="https://github.com/user-attachments/assets/280767cf-60f4-4f74-abcc-8fa0654f15a7" />
+<img width="938" height="881" alt="image" src="https://github.com/user-attachments/assets/43d884aa-1802-49fd-aea6-ef179e1d8b61" />
 
 ## Выводы
 

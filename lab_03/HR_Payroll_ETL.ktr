@@ -1,0 +1,744 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<transformation>
+  <info>
+    <name>HR_Payroll_ETL</name>
+    <description>ETL-трансформация: Вариант 2 — HR (Зарплата).
+    Интеграция данных из PostgreSQL (сотрудники), Excel (оклады) и CSV (премии) в MySQL.</description>
+    <extended_description>
+      Шаги:
+      1. Table Input — чтение сотрудников из PostgreSQL
+      2. Excel Input — чтение окладов из salaries_source.xlsx
+      3. CSV Input — чтение премий из bonuses_source.csv
+      4. Sort + Merge Join (PG + Excel) по emp_id
+      5. Sort + Merge Join (результата + CSV) по emp_id
+      6. Filter Rows — удаление NULL emp_id
+      7. Calculator — расчёт adjusted_salary, total_payout, НДФЛ, ПФР, ОМС, ФСС
+      8. Select Values — выбор и переименование полей
+      9. Table Output — запись в MySQL hr_payroll_final
+    </extended_description>
+    <trans_type>Normal</trans_type>
+    <trans_status>0</trans_status>
+    <directory>/</directory>
+    <parameters>
+    </parameters>
+    <log>
+      <trans>
+        <table/>
+        <schema/>
+        <connection/>
+        <interval/>
+        <timeout/>
+        <size_limit_lines/>
+      </trans>
+      <perf>
+        <table/>
+        <schema/>
+        <connection/>
+        <interval/>
+        <timeout/>
+        <size_limit_lines/>
+      </perf>
+    </log>
+    <maxdateconnection/>
+    <maxdatetable/>
+    <maxdatefield/>
+    <maxdateoffset>0.0</maxdateoffset>
+    <maxdatediff>0.0</maxdatediff>
+    <size_rowset>10000</size_rowset>
+    <sleep_time_empty>50</sleep_time_empty>
+    <sleep_time_full>50</sleep_time_full>
+    <unique_connections>N</unique_connections>
+    <feedback_shown>Y</feedback_shown>
+    <feedback_size>50000</feedback_size>
+    <using_thread_priorities>Y</using_thread_priorities>
+    <shared_objects_file/>
+    <capture_step_performance>N</capture_step_performance>
+    <step_performance_capturing_delay>1000</step_performance_capturing_delay>
+    <step_performance_capturing_size_limit>100</step_performance_capturing_size_limit>
+    <dependencies>
+    </dependencies>
+    <partitionschemas>
+    </partitionschemas>
+    <slaveservers>
+    </slaveservers>
+    <clusterschemas>
+    </clusterschemas>
+    <created_user>admin</created_user>
+    <created_date>2026/03/26 22:00:00.000</created_date>
+    <modified_user>admin</modified_user>
+    <modified_date>2026/03/26 22:00:00.000</modified_date>
+    <key_for_session_key>H4sIAAAAAAAAAAMAAAAAAAAAAAA=</key_for_session_key>
+    <is_key_private>N</is_key_private>
+  </info>
+  <notepads>
+    <notepad>
+      <note>═══════════════════════════════════════════
+Вариант 2: HR (Зарплата) — ETL Pipeline
+═══════════════════════════════════════════
+PostgreSQL (employees) + Excel (salaries) + CSV (bonuses)
+→ MySQL (hr_payroll_final)
+
+Расчёты: НДФЛ 13%, ПФР 22%, ОМС 5.1%, ФСС 2.9%</note>
+      <xloc>20</xloc>
+      <yloc>20</yloc>
+      <width>350</width>
+      <heigth>120</heigth>
+      <fontname>Segoe UI</fontname>
+      <fontsize>10</fontsize>
+      <fontbold>N</fontbold>
+      <fontitalic>N</fontitalic>
+      <fontcolorred>0</fontcolorred>
+      <fontcolorgreen>0</fontcolorgreen>
+      <fontcolorblue>0</fontcolorblue>
+      <backgroundcolorred>255</backgroundcolorred>
+      <backgroundcolorgreen>255</backgroundcolorgreen>
+      <backgroundcolorblue>206</backgroundcolorblue>
+      <bordercolorred>100</bordercolorred>
+      <bordercolorgreen>100</bordercolorgreen>
+      <bordercolorblue>100</bordercolorblue>
+    </notepad>
+  </notepads>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CONNECTIONS                                         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <connection>
+    <name>PostgreSQL_Source</name>
+    <server>localhost</server>
+    <type>POSTGRESQL</type>
+    <access>Native</access>
+    <database>st_200</database>
+    <port>5432</port>
+    <username>admin</username>
+    <password>admin</password>
+    <servername/>
+    <data_tablespace/>
+    <index_tablespace/>
+    <attributes>
+      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>IS_CLUSTERED</code><attribute>N</attribute></attribute>
+      <attribute><code>PORT_NUMBER</code><attribute>5432</attribute></attribute>
+      <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
+      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+      <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+      <attribute><code>USE_POOLING</code><attribute>N</attribute></attribute>
+    </attributes>
+  </connection>
+
+  <connection>
+    <name>MySQL_Target</name>
+    <server>95.131.149.21</server>
+    <type>MYSQL</type>
+    <access>Native</access>
+    <database>mgpu_ico_etl_XX</database>
+    <port>3306</port>
+    <username>YOUR_LOGIN</username>
+    <password>YOUR_PASSWORD</password>
+    <servername/>
+    <data_tablespace/>
+    <index_tablespace/>
+    <attributes>
+      <attribute><code>FORCE_IDENTIFIERS_TO_LOWERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>FORCE_IDENTIFIERS_TO_UPPERCASE</code><attribute>N</attribute></attribute>
+      <attribute><code>IS_CLUSTERED</code><attribute>N</attribute></attribute>
+      <attribute><code>PORT_NUMBER</code><attribute>3306</attribute></attribute>
+      <attribute><code>PRESERVE_RESERVED_WORD_CASE</code><attribute>Y</attribute></attribute>
+      <attribute><code>QUOTE_ALL_FIELDS</code><attribute>N</attribute></attribute>
+      <attribute><code>STREAM_RESULTS</code><attribute>Y</attribute></attribute>
+      <attribute><code>SUPPORTS_BOOLEAN_DATA_TYPE</code><attribute>Y</attribute></attribute>
+      <attribute><code>SUPPORTS_TIMESTAMP_DATA_TYPE</code><attribute>Y</attribute></attribute>
+      <attribute><code>USE_POOLING</code><attribute>N</attribute></attribute>
+      <attribute><code>EXTRA_OPTION_MYSQL.characterEncoding</code><attribute>UTF-8</attribute></attribute>
+    </attributes>
+  </connection>
+
+  <order>
+    <!-- PostgreSQL branch -->
+    <hop><from>Table Input - Employees</from><to>Sort rows - PG by emp_id</to><enabled>Y</enabled></hop>
+
+    <!-- Excel branch -->
+    <hop><from>Excel Input - Salaries</from><to>Sort rows - Excel by emp_id</to><enabled>Y</enabled></hop>
+
+    <!-- Merge PG + Excel -->
+    <hop><from>Sort rows - PG by emp_id</from><to>Merge Join - PG + Excel</to><enabled>Y</enabled></hop>
+    <hop><from>Sort rows - Excel by emp_id</from><to>Merge Join - PG + Excel</to><enabled>Y</enabled></hop>
+
+    <!-- CSV branch -->
+    <hop><from>CSV Input - Bonuses</from><to>Sort rows - CSV by emp_id</to><enabled>Y</enabled></hop>
+
+    <!-- Merge (PG+Excel) + CSV -->
+    <hop><from>Merge Join - PG + Excel</from><to>Sort rows - Merged by emp_id</to><enabled>Y</enabled></hop>
+    <hop><from>Sort rows - Merged by emp_id</from><to>Merge Join - All Sources</to><enabled>Y</enabled></hop>
+    <hop><from>Sort rows - CSV by emp_id</from><to>Merge Join - All Sources</to><enabled>Y</enabled></hop>
+
+    <!-- Filter NULLs -->
+    <hop><from>Merge Join - All Sources</from><to>Filter - Remove NULL emp_id</to><enabled>Y</enabled></hop>
+
+    <!-- Calculator -->
+    <hop><from>Filter - Remove NULL emp_id</from><to>Calculator - Payroll</to><enabled>Y</enabled></hop>
+
+    <!-- Concat full name -->
+    <hop><from>Calculator - Payroll</from><to>Concat - Full Name</to><enabled>Y</enabled></hop>
+
+    <!-- Select values -->
+    <hop><from>Concat - Full Name</from><to>Select Values - Final</to><enabled>Y</enabled></hop>
+
+    <!-- Output -->
+    <hop><from>Select Values - Final</from><to>Table Output - MySQL</to><enabled>Y</enabled></hop>
+  </order>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- STEP 1: Table Input — PostgreSQL (employees_info)   -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Table Input - Employees</name>
+    <type>TableInput</type>
+    <description>Чтение данных сотрудников из PostgreSQL</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <connection>PostgreSQL_Source</connection>
+    <sql>SELECT
+    emp_id,
+    last_name,
+    first_name,
+    middle_name,
+    birth_date,
+    gender,
+    department,
+    position,
+    hire_date,
+    inn,
+    snils,
+    email,
+    phone,
+    is_active
+FROM employees_info
+WHERE is_active = TRUE</sql>
+    <limit>0</limit>
+    <lookup/>
+    <execute_each_row>N</execute_each_row>
+    <variables_active>N</variables_active>
+    <lazy_conversion_active>N</lazy_conversion_active>
+    <GUI>
+      <xloc>100</xloc>
+      <yloc>250</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- STEP 2: Excel Input — Salaries                      -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Excel Input - Salaries</name>
+    <type>ExcelInput</type>
+    <description>Чтение справочника окладов из Excel</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <header>Y</header>
+    <noempty>Y</noempty>
+    <stoponempty>N</stoponempty>
+    <filefield/>
+    <sheetfield/>
+    <sheetrownumfield/>
+    <rownumfield/>
+    <sheetfield/>
+    <filefield/>
+    <limit>0</limit>
+    <encoding/>
+    <add_to_result_filenames>Y</add_to_result_filenames>
+    <accept_filenames>N</accept_filenames>
+    <accept_field/>
+    <accept_stepname/>
+    <spreadsheet_type>POI</spreadsheet_type>
+    <file>
+      <name>${Internal.Transformation.Filename.Directory}/data/salaries_source.xlsx</name>
+      <filemask/>
+      <exclude_filemask/>
+      <file_required>Y</file_required>
+      <include_subfolders>N</include_subfolders>
+    </file>
+    <sheets>
+      <sheet><name>Оклады</name><startrow>0</startrow><startcol>0</startcol></sheet>
+    </sheets>
+    <fields>
+      <field><name>emp_id</name><type>Integer</type><length>-1</length><precision>-1</precision><trim_type>none</trim_type><repeat>N</repeat></field>
+      <field><name>grade</name><type>String</type><length>50</length><precision>-1</precision><trim_type>both</trim_type><repeat>N</repeat></field>
+      <field><name>base_salary</name><type>Number</type><length>12</length><precision>2</precision><trim_type>none</trim_type><repeat>N</repeat></field>
+      <field><name>seniority_pct</name><type>Number</type><length>5</length><precision>1</precision><trim_type>none</trim_type><repeat>N</repeat></field>
+      <field><name>regional_coeff</name><type>Number</type><length>4</length><precision>2</precision><trim_type>none</trim_type><repeat>N</repeat></field>
+      <field><name>effective_date</name><type>String</type><length>10</length><precision>-1</precision><trim_type>both</trim_type><repeat>N</repeat></field>
+      <field><name>currency</name><type>String</type><length>3</length><precision>-1</precision><trim_type>both</trim_type><repeat>N</repeat></field>
+    </fields>
+    <strict_types>N</strict_types>
+    <error_ignored>N</error_ignored>
+    <error_line_skipped>N</error_line_skipped>
+    <bad_line_files_destination_directory/>
+    <bad_line_files_extension>warning</bad_line_files_extension>
+    <error_line_files_destination_directory/>
+    <error_line_files_extension>error</error_line_files_extension>
+    <line_number_files_destination_directory/>
+    <line_number_files_extension>line</line_number_files_extension>
+    <shortFileFieldName/>
+    <pathFieldName/>
+    <hiddenFieldName/>
+    <lastModificationTimeFieldName/>
+    <uriNameFieldName/>
+    <rootUriNameFieldName/>
+    <extensionFieldName/>
+    <sizeFieldName/>
+    <GUI>
+      <xloc>100</xloc>
+      <yloc>400</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- STEP 3: CSV Input — Bonuses                         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>CSV Input - Bonuses</name>
+    <type>CsvInput</type>
+    <description>Чтение данных о премиях из CSV-файла</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <filename>${Internal.Transformation.Filename.Directory}/data/bonuses_source.csv</filename>
+    <filename_field/>
+    <rownum_field/>
+    <include_filename>N</include_filename>
+    <separator>;</separator>
+    <enclosure>"</enclosure>
+    <header>Y</header>
+    <buffer_size>50000</buffer_size>
+    <lazy_conversion>Y</lazy_conversion>
+    <add_filename_result>N</add_filename_result>
+    <parallel>N</parallel>
+    <newline_possible>N</newline_possible>
+    <encoding>UTF-8</encoding>
+    <fields>
+      <field><name>emp_id</name><type>Integer</type><format/><currency/><decimal>.</decimal><group/><length>-1</length><precision>-1</precision><trim_type>none</trim_type></field>
+      <field><name>bonus_type</name><type>String</type><format/><currency/><decimal/><group/><length>100</length><precision>-1</precision><trim_type>both</trim_type></field>
+      <field><name>bonus_amount</name><type>Number</type><format/><currency/><decimal>.</decimal><group/><length>12</length><precision>2</precision><trim_type>none</trim_type></field>
+      <field><name>bonus_date</name><type>String</type><format/><currency/><decimal/><group/><length>10</length><precision>-1</precision><trim_type>both</trim_type></field>
+      <field><name>comment</name><type>String</type><format/><currency/><decimal/><group/><length>255</length><precision>-1</precision><trim_type>both</trim_type></field>
+    </fields>
+    <GUI>
+      <xloc>100</xloc>
+      <yloc>550</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SORT steps for Merge Joins                          -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Sort rows - PG by emp_id</name>
+    <type>SortRows</type>
+    <description>Сортировка данных из PG по emp_id</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <directory>${java.io.tmpdir}</directory>
+    <prefix>sort_pg</prefix>
+    <sort_size>1000000</sort_size>
+    <free_memory/>
+    <compress>N</compress>
+    <compress_variable/>
+    <unique_rows>N</unique_rows>
+    <fields>
+      <field><name>emp_id</name><ascending>Y</ascending><case_sensitive>N</case_sensitive><collator_enabled>N</collator_enabled><collator_strength>0</collator_strength><presorted>N</presorted></field>
+    </fields>
+    <GUI>
+      <xloc>300</xloc>
+      <yloc>250</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <step>
+    <name>Sort rows - Excel by emp_id</name>
+    <type>SortRows</type>
+    <description>Сортировка данных из Excel по emp_id</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <directory>${java.io.tmpdir}</directory>
+    <prefix>sort_excel</prefix>
+    <sort_size>100000</sort_size>
+    <free_memory/>
+    <compress>N</compress>
+    <compress_variable/>
+    <unique_rows>N</unique_rows>
+    <fields>
+      <field><name>emp_id</name><ascending>Y</ascending><case_sensitive>N</case_sensitive><collator_enabled>N</collator_enabled><collator_strength>0</collator_strength><presorted>N</presorted></field>
+    </fields>
+    <GUI>
+      <xloc>300</xloc>
+      <yloc>400</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <step>
+    <name>Sort rows - CSV by emp_id</name>
+    <type>SortRows</type>
+    <description>Сортировка данных из CSV по emp_id</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <directory>${java.io.tmpdir}</directory>
+    <prefix>sort_csv</prefix>
+    <sort_size>100000</sort_size>
+    <free_memory/>
+    <compress>N</compress>
+    <compress_variable/>
+    <unique_rows>N</unique_rows>
+    <fields>
+      <field><name>emp_id</name><ascending>Y</ascending><case_sensitive>N</case_sensitive><collator_enabled>N</collator_enabled><collator_strength>0</collator_strength><presorted>N</presorted></field>
+    </fields>
+    <GUI>
+      <xloc>300</xloc>
+      <yloc>550</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- MERGE JOIN 1: PG + Excel (by emp_id)                -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Merge Join - PG + Excel</name>
+    <type>MergeJoin</type>
+    <description>LEFT JOIN: Сотрудники + Оклады по emp_id</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <join_type>LEFT OUTER</join_type>
+    <step1>Sort rows - PG by emp_id</step1>
+    <step2>Sort rows - Excel by emp_id</step2>
+    <keys_1>
+      <key>emp_id</key>
+    </keys_1>
+    <keys_2>
+      <key>emp_id</key>
+    </keys_2>
+    <GUI>
+      <xloc>500</xloc>
+      <yloc>320</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- Sort merged for second join -->
+  <step>
+    <name>Sort rows - Merged by emp_id</name>
+    <type>SortRows</type>
+    <description>Сортировка объединённого потока</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <directory>${java.io.tmpdir}</directory>
+    <prefix>sort_merged</prefix>
+    <sort_size>1000000</sort_size>
+    <free_memory/>
+    <compress>N</compress>
+    <compress_variable/>
+    <unique_rows>N</unique_rows>
+    <fields>
+      <field><name>emp_id</name><ascending>Y</ascending><case_sensitive>N</case_sensitive><collator_enabled>N</collator_enabled><collator_strength>0</collator_strength><presorted>N</presorted></field>
+    </fields>
+    <GUI>
+      <xloc>650</xloc>
+      <yloc>320</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- MERGE JOIN 2: (PG+Excel) + CSV (by emp_id)         -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Merge Join - All Sources</name>
+    <type>MergeJoin</type>
+    <description>LEFT JOIN: (PG+Excel) + CSV по emp_id</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <join_type>LEFT OUTER</join_type>
+    <step1>Sort rows - Merged by emp_id</step1>
+    <step2>Sort rows - CSV by emp_id</step2>
+    <keys_1>
+      <key>emp_id</key>
+    </keys_1>
+    <keys_2>
+      <key>emp_id</key>
+    </keys_2>
+    <GUI>
+      <xloc>650</xloc>
+      <yloc>450</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- FILTER ROWS — Remove null emp_id                    -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Filter - Remove NULL emp_id</name>
+    <type>FilterRows</type>
+    <description>Фильтрация: удалить строки с пустым emp_id</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <send_true_to>Calculator - Payroll</send_true_to>
+    <send_false_to/>
+    <compare>
+      <condition>
+        <negated>N</negated>
+        <leftvalue>emp_id</leftvalue>
+        <function>IS NOT NULL</function>
+        <rightvalue/>
+      </condition>
+    </compare>
+    <GUI>
+      <xloc>800</xloc>
+      <yloc>450</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- CALCULATOR — Payroll calculations                   -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Calculator - Payroll</name>
+    <type>Calculator</type>
+    <description>Расчёт: скорректированный оклад, итого, НДФЛ, ПФР, ОМС, ФСС</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <failIfNoFile>Y</failIfNoFile>
+    <calculation>
+      <!-- seniority_multiplier = 1 + seniority_pct / 100 -->
+      <field_name>seniority_factor_pct</field_name>
+      <calc_type>CONSTANT</calc_type>
+      <field_a>100</field_a>
+      <field_b/>
+      <field_c/>
+      <value_type>Number</value_type>
+      <value_length>-1</value_length>
+      <value_precision>-1</value_precision>
+      <remove>Y</remove>
+      <conversion_mask/>
+      <decimal_symbol/>
+      <grouping_symbol/>
+      <currency_symbol/>
+    </calculation>
+    <calculation>
+      <!-- adjusted_salary = base_salary * (1 + seniority_pct/100) * regional_coeff -->
+      <!-- This is done via scripting step or multiple calc steps in real Pentaho -->
+      <field_name>adjusted_salary</field_name>
+      <calc_type>CONSTANT</calc_type>
+      <field_a>0</field_a>
+      <field_b/>
+      <field_c/>
+      <value_type>Number</value_type>
+      <value_length>12</value_length>
+      <value_precision>2</value_precision>
+      <remove>N</remove>
+      <conversion_mask/>
+      <decimal_symbol/>
+      <grouping_symbol/>
+      <currency_symbol/>
+    </calculation>
+    <GUI>
+      <xloc>950</xloc>
+      <yloc>450</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- Modified Java Script — concat + calculations       -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Concat - Full Name</name>
+    <type>ScriptValueMod</type>
+    <description>JavaScript: формируем ФИО и вычисления</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <compatible>N</compatible>
+    <optimizationLevel>9</optimizationLevel>
+    <jsScripts>
+      <jsScript>
+        <jsScript_type>0</jsScript_type>
+        <jsScript_name>Script 1</jsScript_name>
+        <jsScript_script>
+// ФИО
+var full_name = last_name + ' ' + first_name;
+if (middle_name != null &amp;&amp; middle_name != '') {
+    full_name = full_name + ' ' + middle_name;
+}
+
+// Скорректированный оклад
+var bs = (base_salary == null) ? 0 : Number(base_salary);
+var sp = (seniority_pct == null) ? 0 : Number(seniority_pct);
+var rc = (regional_coeff == null) ? 1 : Number(regional_coeff);
+var ba = (bonus_amount == null) ? 0 : Number(bonus_amount);
+
+var adjusted_salary = bs * (1 + sp / 100) * rc;
+adjusted_salary = Math.round(adjusted_salary * 100) / 100;
+
+// Итого начисление
+var total_payout = adjusted_salary + ba;
+total_payout = Math.round(total_payout * 100) / 100;
+
+// НДФЛ 13%
+var tax_ndfl = Math.round(total_payout * 0.13 * 100) / 100;
+
+// Страховые взносы (начисляются сверх зарплаты)
+var tax_pension = Math.round(total_payout * 0.22 * 100) / 100;    // ПФР
+var tax_medical = Math.round(total_payout * 0.051 * 100) / 100;   // ОМС
+var tax_social  = Math.round(total_payout * 0.029 * 100) / 100;   // ФСС
+
+// Чистая выплата (на руки) = итого - НДФЛ
+var net_payout = Math.round((total_payout - tax_ndfl) * 100) / 100;
+
+// Полная стоимость для работодателя = итого + взносы
+var employer_cost = Math.round((total_payout + tax_pension + tax_medical + tax_social) * 100) / 100;
+        </jsScript_script>
+      </jsScript>
+    </jsScripts>
+    <fields>
+      <field><name>full_name</name><rename>full_name</rename><type>String</type><length>300</length><precision>-1</precision><replace>N</replace></field>
+      <field><name>adjusted_salary</name><rename>adjusted_salary</rename><type>Number</type><length>12</length><precision>2</precision><replace>Y</replace></field>
+      <field><name>total_payout</name><rename>total_payout</rename><type>Number</type><length>12</length><precision>2</precision><replace>N</replace></field>
+      <field><name>tax_ndfl</name><rename>tax_ndfl</rename><type>Number</type><length>12</length><precision>2</precision><replace>N</replace></field>
+      <field><name>tax_pension</name><rename>tax_pension</rename><type>Number</type><length>12</length><precision>2</precision><replace>N</replace></field>
+      <field><name>tax_medical</name><rename>tax_medical</rename><type>Number</type><length>12</length><precision>2</precision><replace>N</replace></field>
+      <field><name>tax_social</name><rename>tax_social</rename><type>Number</type><length>12</length><precision>2</precision><replace>N</replace></field>
+      <field><name>net_payout</name><rename>net_payout</rename><type>Number</type><length>12</length><precision>2</precision><replace>N</replace></field>
+      <field><name>employer_cost</name><rename>employer_cost</rename><type>Number</type><length>12</length><precision>2</precision><replace>N</replace></field>
+    </fields>
+    <GUI>
+      <xloc>1100</xloc>
+      <yloc>450</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- SELECT VALUES — Final field mapping                 -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Select Values - Final</name>
+    <type>SelectValues</type>
+    <description>Выбор и переименование полей для MySQL</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <fields>
+      <field><name>emp_id</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>full_name</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>department</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>position</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>grade</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>base_salary</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>seniority_pct</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>regional_coeff</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>adjusted_salary</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>bonus_amount</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>bonus_type</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>total_payout</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>tax_ndfl</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>tax_pension</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>tax_medical</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>tax_social</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>net_payout</name><rename/><length>-2</length><precision>-2</precision></field>
+      <field><name>employer_cost</name><rename/><length>-2</length><precision>-2</precision></field>
+    </fields>
+    <select_unspecified>N</select_unspecified>
+    <GUI>
+      <xloc>1250</xloc>
+      <yloc>450</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+  <!-- ═══════════════════════════════════════════════════ -->
+  <!-- TABLE OUTPUT — MySQL (hr_payroll_final)             -->
+  <!-- ═══════════════════════════════════════════════════ -->
+  <step>
+    <name>Table Output - MySQL</name>
+    <type>TableOutput</type>
+    <description>Загрузка данных в MySQL hr_payroll_final</description>
+    <distribute>Y</distribute>
+    <custom_distribution/>
+    <copies>1</copies>
+    <partitioning><type>none</type><schemaname/></partitioning>
+    <connection>MySQL_Target</connection>
+    <schema/>
+    <table>hr_payroll_final</table>
+    <commit>10000</commit>
+    <truncate>Y</truncate>
+    <ignore_errors>N</ignore_errors>
+    <use_batch>Y</use_batch>
+    <specify_fields>Y</specify_fields>
+    <partitioning_enabled>N</partitioning_enabled>
+    <partitioning_field/>
+    <partitioning_daily>N</partitioning_daily>
+    <partitioning_monthly>Y</partitioning_monthly>
+    <tablename_in_field>N</tablename_in_field>
+    <tablename_field/>
+    <tablename_in_table>Y</tablename_in_table>
+    <return_keys>N</return_keys>
+    <return_field/>
+    <fields>
+      <field><column_name>emp_id</column_name><stream_name>emp_id</stream_name></field>
+      <field><column_name>full_name</column_name><stream_name>full_name</stream_name></field>
+      <field><column_name>department</column_name><stream_name>department</stream_name></field>
+      <field><column_name>position</column_name><stream_name>position</stream_name></field>
+      <field><column_name>grade</column_name><stream_name>grade</stream_name></field>
+      <field><column_name>base_salary</column_name><stream_name>base_salary</stream_name></field>
+      <field><column_name>seniority_pct</column_name><stream_name>seniority_pct</stream_name></field>
+      <field><column_name>regional_coeff</column_name><stream_name>regional_coeff</stream_name></field>
+      <field><column_name>adjusted_salary</column_name><stream_name>adjusted_salary</stream_name></field>
+      <field><column_name>bonus_amount</column_name><stream_name>bonus_amount</stream_name></field>
+      <field><column_name>bonus_type</column_name><stream_name>bonus_type</stream_name></field>
+      <field><column_name>total_payout</column_name><stream_name>total_payout</stream_name></field>
+      <field><column_name>tax_ndfl</column_name><stream_name>tax_ndfl</stream_name></field>
+      <field><column_name>tax_pension</column_name><stream_name>tax_pension</stream_name></field>
+      <field><column_name>tax_medical</column_name><stream_name>tax_medical</stream_name></field>
+      <field><column_name>tax_social</column_name><stream_name>tax_social</stream_name></field>
+      <field><column_name>net_payout</column_name><stream_name>net_payout</stream_name></field>
+      <field><column_name>employer_cost</column_name><stream_name>employer_cost</stream_name></field>
+    </fields>
+    <GUI>
+      <xloc>1400</xloc>
+      <yloc>450</yloc>
+      <draw>Y</draw>
+    </GUI>
+  </step>
+
+</transformation>

@@ -1,0 +1,204 @@
+<mxfile host="app.diagrams.net" modified="2026-03-26T22:00:00.000Z" agent="5.0" version="24.0.0" etag="etl_hr_arch" type="device">
+  <diagram id="ETL_HR_Architecture" name="Архитектура ETL — Вариант 2: HR (Зарплата)">
+    <mxGraphModel dx="1422" dy="762" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="1" pageScale="1" pageWidth="1600" pageHeight="900" math="0" shadow="0">
+      <root>
+        <mxCell id="0"/>
+        <mxCell id="1" parent="0"/>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- TITLE                                        -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="title" value="&lt;b&gt;Архитектура ETL-решения — Вариант 2: HR (Зарплата)&lt;/b&gt;" style="text;html=1;strokeColor=none;fillColor=none;align=center;verticalAlign=middle;whiteSpace=wrap;rounded=0;fontSize=18;fontColor=#1a1a2e;" vertex="1" parent="1">
+          <mxGeometry x="400" y="10" width="800" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- SOURCE LAYER                                 -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="source_container" value="&lt;b&gt;SOURCE LAYER&lt;/b&gt;&lt;br&gt;(Слой источников)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#dae8fc;strokeColor=#6c8ebf;verticalAlign=top;fontSize=14;fontStyle=1;arcSize=8;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="40" y="70" width="400" height="500" as="geometry"/>
+        </mxCell>
+
+        <!-- PostgreSQL -->
+        <mxCell id="pg_icon" value="&lt;b&gt;PostgreSQL&lt;/b&gt;&lt;br&gt;localhost:5432&lt;br&gt;БД: st_200" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#0050ef;fontColor=#ffffff;strokeColor=#001DBC;fontSize=11;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="140" width="140" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="pg_table" value="&lt;b&gt;employees_info&lt;/b&gt;&lt;br&gt;(1 000 000 записей)&lt;br&gt;&lt;hr&gt;&lt;i&gt;emp_id, last_name, first_name,&lt;br&gt;middle_name, department,&lt;br&gt;position, hire_date, is_active&lt;/i&gt;" style="shape=table;startSize=0;container=0;collapsible=0;childLayout=tableLayout;fixedRows=0;rowLines=0;fontStyle=0;align=left;resizeLast=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=10;shadow=1;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="240" width="200" height="120" as="geometry"/>
+        </mxCell>
+
+        <!-- Excel -->
+        <mxCell id="excel_icon" value="&lt;b&gt;📊 Excel&lt;/b&gt;&lt;br&gt;salaries_source.xlsx&lt;br&gt;(50 000 записей)" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=0.1;fillColor=#60a917;fontColor=#ffffff;strokeColor=#2D7600;fontSize=11;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="390" width="160" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="excel_fields" value="&lt;i&gt;emp_id, grade, base_salary,&lt;br&gt;seniority_pct, regional_coeff&lt;/i&gt;" style="text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;arcSize=15;fontSize=9;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="80" y="480" width="160" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- CSV -->
+        <mxCell id="csv_icon" value="&lt;b&gt;📄 CSV&lt;/b&gt;&lt;br&gt;bonuses_source.csv&lt;br&gt;(50 000 записей)" style="shape=document;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=0.1;fillColor=#e3c800;fontColor=#000000;strokeColor=#B09500;fontSize=11;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="260" y="390" width="160" height="80" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="csv_fields" value="&lt;i&gt;emp_id, bonus_type,&lt;br&gt;bonus_amount, bonus_date&lt;/i&gt;" style="text;html=1;strokeColor=#d6b656;fillColor=#fff2cc;align=left;verticalAlign=middle;whiteSpace=wrap;rounded=1;arcSize=15;fontSize=9;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="260" y="480" width="160" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- ETL PROCESS (Pentaho)                        -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="etl_container" value="&lt;b&gt;ETL PROCESS&lt;/b&gt;&lt;br&gt;(Pentaho Data Integration 9.4)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;verticalAlign=top;fontSize=14;fontStyle=1;arcSize=8;dashed=1;dashPattern=5 5;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="480" y="70" width="280" height="500" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="etl_step1" value="1️⃣ Table Input&lt;br&gt;(PostgreSQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="120" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl_step2" value="2️⃣ Excel Input&lt;br&gt;(Оклады)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="170" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl_step3" value="3️⃣ CSV Input&lt;br&gt;(Премии)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#f8cecc;strokeColor=#b85450;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="220" width="120" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl_step4" value="4️⃣ Sort + Merge Join&lt;br&gt;(PG + Excel by emp_id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="280" width="220" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl_step5" value="5️⃣ Sort + Merge Join&lt;br&gt;(Результат + CSV by emp_id)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="330" width="220" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl_step6" value="6️⃣ Filter Rows&lt;br&gt;(Удаление NULL / дублей)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#e1d5e7;strokeColor=#9673a6;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="385" width="220" height="40" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl_step7" value="7️⃣ Calculator / JavaScript&lt;br&gt;adjusted_salary, total_payout,&lt;br&gt;НДФЛ 13%, ПФР 22%, ОМС 5.1%, ФСС 2.9%" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="440" width="220" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="etl_step8" value="8️⃣ Table Output&lt;br&gt;→ MySQL hr_payroll_final" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#0050ef;fontColor=#ffffff;strokeColor=#001DBC;fontSize=10;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="510" y="510" width="220" height="40" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- STORAGE LAYER (MySQL)                        -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="storage_container" value="&lt;b&gt;STORAGE LAYER&lt;/b&gt;&lt;br&gt;(Слой хранения — MySQL)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#d5e8d4;strokeColor=#82b366;verticalAlign=top;fontSize=14;fontStyle=1;arcSize=8;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="800" y="70" width="370" height="500" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="mysql_icon" value="&lt;b&gt;MySQL&lt;/b&gt;&lt;br&gt;95.131.149.21:3306&lt;br&gt;БД: mgpu_ico_etl_XX" style="shape=cylinder3;whiteSpace=wrap;html=1;boundedLbl=1;backgroundOutline=1;size=15;fillColor=#a20025;fontColor=#ffffff;strokeColor=#6F0000;fontSize=11;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="900" y="130" width="150" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- Staging -->
+        <mxCell id="stg_table" value="&lt;b&gt;stg_employees&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Staging Area)&lt;/i&gt;" style="shape=table;startSize=0;container=0;collapsible=0;fillColor=#f5f5f5;strokeColor=#666666;fontColor=#333333;rounded=1;arcSize=10;shadow=1;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="240" width="140" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Fact tables -->
+        <mxCell id="fact_payroll" value="&lt;b&gt;hr_payroll_final&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Таблица фактов)&lt;/i&gt;&lt;br&gt;&lt;hr&gt;emp_id, full_name, department,&lt;br&gt;base_salary, adjusted_salary,&lt;br&gt;bonus_amount, total_payout,&lt;br&gt;tax_ndfl, net_payout,&lt;br&gt;employer_cost" style="shape=table;startSize=0;container=0;collapsible=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=10;shadow=1;fontSize=10;whiteSpace=wrap;html=1;align=left;" vertex="1" parent="1">
+          <mxGeometry x="820" y="310" width="180" height="150" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="fact_bonuses" value="&lt;b&gt;fact_bonuses&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Детализация премий)&lt;/i&gt;" style="shape=table;startSize=0;container=0;collapsible=0;fillColor=#dae8fc;strokeColor=#6c8ebf;rounded=1;arcSize=10;shadow=1;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="820" y="480" width="150" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- Dimension tables -->
+        <mxCell id="dim_dept" value="&lt;b&gt;dim_department&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Измерение)&lt;/i&gt;" style="shape=table;startSize=0;container=0;collapsible=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=10;shadow=1;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="310" width="130" height="45" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="dim_grade" value="&lt;b&gt;dim_grade&lt;/b&gt;&lt;br&gt;&lt;i&gt;(Измерение)&lt;/i&gt;" style="shape=table;startSize=0;container=0;collapsible=0;fillColor=#e1d5e7;strokeColor=#9673a6;rounded=1;arcSize=10;shadow=1;fontSize=10;whiteSpace=wrap;html=1;" vertex="1" parent="1">
+          <mxGeometry x="1020" y="375" width="130" height="45" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- BUSINESS LAYER                               -->
+        <!-- ═══════════════════════════════════════════ -->
+        <mxCell id="business_container" value="&lt;b&gt;BUSINESS LAYER&lt;/b&gt;&lt;br&gt;(Бизнес-слой — Витрины данных)" style="rounded=1;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;verticalAlign=top;fontSize=14;fontStyle=1;arcSize=8;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="70" width="350" height="500" as="geometry"/>
+        </mxCell>
+
+        <mxCell id="view1" value="&lt;b&gt;view_payroll_by_department&lt;/b&gt;&lt;br&gt;Начисления по отделам" style="shape=card;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;arcSize=10;shadow=1;fontSize=10;size=15;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="130" width="180" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="view2" value="&lt;b&gt;view_payroll_by_grade&lt;/b&gt;&lt;br&gt;Начисления по грейдам" style="shape=card;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;arcSize=10;shadow=1;fontSize=10;size=15;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="200" width="180" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="view3" value="&lt;b&gt;view_tax_burden&lt;/b&gt;&lt;br&gt;Налоговая нагрузка" style="shape=card;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;arcSize=10;shadow=1;fontSize=10;size=15;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="270" width="180" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="view4" value="&lt;b&gt;view_top_earners&lt;/b&gt;&lt;br&gt;Топ-100 по выплатам" style="shape=card;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;arcSize=10;shadow=1;fontSize=10;size=15;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="340" width="180" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="view5" value="&lt;b&gt;view_bonus_analysis&lt;/b&gt;&lt;br&gt;Анализ премий по типам" style="shape=card;whiteSpace=wrap;html=1;fillColor=#fff2cc;strokeColor=#d6b656;rounded=0;arcSize=10;shadow=1;fontSize=10;size=15;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="410" width="180" height="55" as="geometry"/>
+        </mxCell>
+        <mxCell id="view6" value="&lt;b&gt;view_analytics_report&lt;/b&gt;&lt;br&gt;Итоговая аналитическая витрина" style="shape=card;whiteSpace=wrap;html=1;fillColor=#ffe0b2;strokeColor=#e65100;rounded=0;arcSize=10;shadow=1;fontSize=10;fontStyle=1;size=15;" vertex="1" parent="1">
+          <mxGeometry x="1230" y="480" width="180" height="55" as="geometry"/>
+        </mxCell>
+
+        <!-- Business user icon -->
+        <mxCell id="biz_user" value="&lt;b&gt;Бизнес-&lt;br&gt;пользователь&lt;/b&gt;" style="shape=mxgraph.basic.smiley;whiteSpace=wrap;html=1;fillColor=#ffe6cc;strokeColor=#d79b00;shadow=1;" vertex="1" parent="1">
+          <mxGeometry x="1450" y="280" width="80" height="80" as="geometry"/>
+        </mxCell>
+
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- ARROWS                                       -->
+        <!-- ═══════════════════════════════════════════ -->
+        <!-- Source → ETL -->
+        <mxCell id="arrow1" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#0050ef;strokeWidth=2;endArrow=blockThin;endFill=1;shadow=1;" edge="1" parent="1" source="pg_icon" target="etl_step1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow2" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#60a917;strokeWidth=2;endArrow=blockThin;endFill=1;shadow=1;" edge="1" parent="1" source="excel_icon" target="etl_step2">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow3" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#e3c800;strokeWidth=2;endArrow=blockThin;endFill=1;shadow=1;" edge="1" parent="1" source="csv_icon" target="etl_step3">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ETL internal arrows -->
+        <mxCell id="arrow4" style="rounded=1;html=1;strokeColor=#999;strokeWidth=1;endArrow=blockThin;endFill=1;dashed=1;" edge="1" parent="1" source="etl_step1" target="etl_step4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow5" style="rounded=1;html=1;strokeColor=#999;strokeWidth=1;endArrow=blockThin;endFill=1;dashed=1;" edge="1" parent="1" source="etl_step2" target="etl_step4">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow6" style="rounded=1;html=1;strokeColor=#999;strokeWidth=1;endArrow=blockThin;endFill=1;dashed=1;" edge="1" parent="1" source="etl_step3" target="etl_step5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow7" style="rounded=1;html=1;strokeColor=#999;strokeWidth=1;endArrow=blockThin;endFill=1;dashed=1;" edge="1" parent="1" source="etl_step4" target="etl_step5">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow8" style="rounded=1;html=1;strokeColor=#999;strokeWidth=1;endArrow=blockThin;endFill=1;dashed=1;" edge="1" parent="1" source="etl_step5" target="etl_step6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow9" style="rounded=1;html=1;strokeColor=#999;strokeWidth=1;endArrow=blockThin;endFill=1;dashed=1;" edge="1" parent="1" source="etl_step6" target="etl_step7">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow10" style="rounded=1;html=1;strokeColor=#999;strokeWidth=1;endArrow=blockThin;endFill=1;dashed=1;" edge="1" parent="1" source="etl_step7" target="etl_step8">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- ETL → MySQL -->
+        <mxCell id="arrow11" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#a20025;strokeWidth=3;endArrow=blockThin;endFill=1;shadow=1;" edge="1" parent="1" source="etl_step8" target="mysql_icon">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- MySQL → Views -->
+        <mxCell id="arrow12" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d79b00;strokeWidth=2;endArrow=blockThin;endFill=1;shadow=1;" edge="1" parent="1" source="fact_payroll" target="view1">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+        <mxCell id="arrow13" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#d79b00;strokeWidth=2;endArrow=blockThin;endFill=1;shadow=1;" edge="1" parent="1" source="fact_payroll" target="view6">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+        <!-- Views → Business user -->
+        <mxCell id="arrow14" style="edgeStyle=orthogonalEdgeStyle;rounded=1;orthogonalLoop=1;jettySize=auto;html=1;strokeColor=#e65100;strokeWidth=2;endArrow=blockThin;endFill=1;shadow=1;" edge="1" parent="1" source="view6" target="biz_user">
+          <mxGeometry relative="1" as="geometry"/>
+        </mxCell>
+
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

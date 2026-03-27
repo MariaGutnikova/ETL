@@ -46,28 +46,6 @@
 
 ---
 
-## Структура репозитория
-
-```
-ETL/
-├── README.md                              ← Этот файл
-├── diagrams/
-│   └── architecture_etl_hr.drawio         ← Схема архитектуры (Draw.io)
-├── sql/
-│   ├── postgresql_create_and_populate.sql  ← Создание и заполнение PG (1 млн)
-│   ├── mysql_create_target_tables.sql      ← Целевые таблицы MySQL
-│   └── mysql_create_views.sql             ← Аналитические витрины (6 Views)
-├── scripts/
-│   └── generate_data_files.py             ← Генерация CSV и Excel файлов
-├── data/
-│   ├── salaries_source.xlsx               ← Справочник окладов (50 000)
-│   └── bonuses_source.csv                 ← Данные о премиях (50 000)
-└── pentaho/
-    └── HR_Payroll_ETL.ktr                 ← Трансформация Pentaho
-```
-
----
-
 ## Источники данных
 
 ### 1. PostgreSQL — Личные данные сотрудников (1 000 000 записей)

@@ -6,19 +6,6 @@
 
 ---
 
-## 📋 Содержание
-
-- [Архитектура решения](#архитектура-решения)
-- [Структура репозитория](#структура-репозитория)
-- [Источники данных](#источники-данных)
-- [Техническое окружение](#техническое-окружение)
-- [Инструкция по развёртыванию](#инструкция-по-развёртыванию)
-- [ETL-процесс](#etl-процесс)
-- [Витрины данных](#витрины-данных)
-- [Выводы](#выводы)
-
----
-
 ## Архитектура решения
 
 Архитектура построена на трёхслойной модели:
@@ -126,31 +113,22 @@ ETL/
 
 ---
 
-## Техническое окружение
-
-| Компонент    | Значение                                   |
-|-------------|---------------------------------------------|
-| ВМ          | ETL_devops_26                                |
-| ETL-инструмент | Pentaho Data Integration (PDI) 9.4       |
-| Source DBMS | PostgreSQL (localhost:5432, БД: `st_200`)    |
-| Target DBMS | MySQL (95.131.149.21:3306, БД: `mgpu_ico_etl_XX`) |
-| Моделирование | Draw.io                                   |
-| PG Admin    | http://localhost/login/next=/                 |
-| Логин PG    | admin / admin                                |
-
----
-
-## Инструкция по развёртыванию
+## Ход работы
 
 ### Шаг 1. Подготовка источника (PostgreSQL)
 
 ```bash
 # Подключиться к PostgreSQL через psql или pgAdmin4
-# Выполнить скрипт создания и наполнения таблицы:
-psql -h localhost -p 5432 -U admin -d st_200 -f sql/postgresql_create_and_populate.sql
+# Выполнить скрипты создания и наполнения таблицы:
 ```
+Результат скрипта создания:
+<img width="1916" height="978" alt="image" src="https://github.com/user-attachments/assets/4a0386f3-ac83-446d-bcb9-0967cc7238b9" />
 
-> ⏱ Генерация 1 000 000 записей занимает ~2–5 минут (батчами по 10 000).
+Результат скрипта наполнения:
+<img width="1847" height="956" alt="image" src="https://github.com/user-attachments/assets/a8c3dc9b-746d-4b6d-accd-6ade1d88ed77" />
+
+Данные в таблице:
+<img width="1847" height="1008" alt="image" src="https://github.com/user-attachments/assets/72a4fc78-03b5-4d90-a0d7-19c8a827aa6d" />
 
 ### Шаг 2. Генерация файловых источников
 
@@ -161,6 +139,8 @@ pip install openpyxl
 # Запустить скрипт генерации
 python scripts/generate_data_files.py
 ```
+Результата запуска скрипта:
+<img width="1564" height="974" alt="image" src="https://github.com/user-attachments/assets/93a0c66d-dab5-4b00-87ab-d58907229d84" />
 
 Результат:
 - `data/salaries_source.xlsx` — 50 000 записей
@@ -172,21 +152,53 @@ python scripts/generate_data_files.py
 # Подключиться к MySQL и выполнить скрипт
 mysql -h 95.131.149.21 -P 3306 -u YOUR_LOGIN -p mgpu_ico_etl_XX < sql/mysql_create_target_tables.sql
 ```
+Результат создания БД в MYSQL:
 
 ### Шаг 4. Запуск ETL в Pentaho (Spoon)
 
 1. Открыть Pentaho Spoon (pan.bat / spoon.bat)
 2. Открыть трансформацию: `pentaho/HR_Payroll_ETL.ktr`
-3. **Настроить подключения:**
-   - `PostgreSQL_Source`: localhost:5432 / st_200 / admin:admin
-   - `MySQL_Target`: 95.131.149.21:3306 / mgpu_ico_etl_XX / ваши учётные данные
+3. **Настроить подключения**
+   - `MySQL_Target`: 95.131.149.21:3306 / mgpu_ico_etl_02 / fGq5CRv6
 4. Проверить пути к файлам (Excel, CSV) в шагах Input
 5. Нажать **▶ Run** (F9)
 
+Результат работы:
+
 ### Шаг 5. Создание витрин данных (Views)
 
-```bash
-mysql -h 95.131.149.21 -P 3306 -u YOUR_LOGIN -p mgpu_ico_etl_XX < sql/mysql_create_views.sql
+```SQL
+CREATE OR REPLACE VIEW view_payroll_by_department AS
+SELECT
+    department,
+    COUNT(*)                          AS employees_count,
+    ROUND(AVG(base_salary), 2)        AS avg_base_salary,
+    ROUND(AVG(adjusted_salary), 2)    AS avg_adjusted_salary,
+    ROUND(SUM(bonus_amount), 2)       AS total_bonuses,
+    ROUND(SUM(total_payout), 2)       AS total_payout,
+    ROUND(SUM(tax_ndfl), 2)           AS total_ndfl,
+    ROUND(SUM(net_payout), 2)         AS total_net_payout,
+    ROUND(SUM(employer_cost), 2)      AS total_employer_cost,
+    ROUND(AVG(net_payout), 2)         AS avg_net_payout
+FROM hr_payroll_final
+GROUP BY department
+ORDER BY total_payout DESC;
+```
+Результат работы:
+
+
+### Пример запроса к витрине
+
+```sql
+-- Топ-5 отделов по фонду оплаты труда
+SELECT department, employees_count, total_payout, avg_net_payout
+FROM view_payroll_by_department
+LIMIT 5;
+
+-- Налоговая нагрузка
+SELECT department, gross_payout, total_taxes, tax_burden_pct
+FROM view_tax_burden
+ORDER BY tax_burden_pct DESC;
 ```
 
 ---
@@ -195,15 +207,7 @@ mysql -h 95.131.149.21 -P 3306 -u YOUR_LOGIN -p mgpu_ico_etl_XX < sql/mysql_crea
 
 ### Схема трансформации в Pentaho
 
-```
-PostgreSQL ──▶ Sort ──┐
-(employees)           ├──▶ Merge Join 1 ──▶ Sort ──┐
-Excel ──────▶ Sort ──┘     (LEFT JOIN)             ├──▶ Merge Join 2 ──▶ Filter ──▶ Calculator ──▶ Table Output
-(salaries)                  by emp_id              │     (LEFT JOIN)      NULL       JS: налоги     MySQL
-                                                   │      by emp_id     check       и расчёты
-CSV ────────▶ Sort ────────────────────────────────┘
-(bonuses)
-```
+Обшщий вид:
 
 ### Ключевые шаги
 
@@ -232,36 +236,6 @@ total_payout    = adjusted_salary + bonus_amount
 net_payout    = total_payout − tax_ndfl          (на руки)
 employer_cost = total_payout + tax_pension + tax_medical + tax_social  (полная стоимость)
 ```
-
----
-
-## Витрины данных
-
-После загрузки данных в MySQL создаются 6 аналитических представлений (VIEW):
-
-| # | VIEW                           | Описание                                      |
-|---|--------------------------------|------------------------------------------------|
-| 1 | `view_payroll_by_department`   | Сводка начислений, налогов, чистых выплат по отделам |
-| 2 | `view_payroll_by_grade`        | Анализ зарплат по грейдам (min/avg/max)        |
-| 3 | `view_tax_burden`              | Налоговая нагрузка: НДФЛ + взносы по отделам  |
-| 4 | `view_top_earners`             | Топ-100 сотрудников по общей сумме выплат      |
-| 5 | `view_bonus_analysis`          | Анализ премий: количество, суммы по типам      |
-| 6 | `view_analytics_report`        | Итоговая витрина: отдел × грейд (для дашборда) |
-
-### Пример запроса к витрине
-
-```sql
--- Топ-5 отделов по фонду оплаты труда
-SELECT department, employees_count, total_payout, avg_net_payout
-FROM view_payroll_by_department
-LIMIT 5;
-
--- Налоговая нагрузка
-SELECT department, gross_payout, total_taxes, tax_burden_pct
-FROM view_tax_burden
-ORDER BY tax_burden_pct DESC;
-```
-
 ---
 
 ## Выводы
@@ -277,10 +251,4 @@ ORDER BY tax_burden_pct DESC;
 
 4. **Реализованы вычисляемые показатели**: скорректированный оклад (с учётом стажа и районного коэффициента), налоговые отчисления (НДФЛ 13%, ПФР 22%, ОМС 5.1%, ФСС 2.9%), чистая выплата и полная стоимость для работодателя.
 
-5. **Созданы 6 аналитических витрин** (MySQL Views) для бизнес-пользователей, покрывающие ключевые аналитические срезы: по отделам, грейдам, налоговой нагрузке, топ-сотрудникам и типам премий.
 
----
-
-**Автор:** Студент  
-**Дата:** Март 2026  
-**Инструменты:** Pentaho PDI 9.4, PostgreSQL, MySQL, Python, Draw.io

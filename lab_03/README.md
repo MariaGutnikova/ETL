@@ -42,7 +42,7 @@
                                                   └──────────────────────┘
 ```
 
-> Подробная схема в формате Draw.io: [`diagrams/architecture_etl_hr.drawio`](diagrams/architecture_etl_hr.drawio)
+> Подробная схема в формате Draw.io: [`diagrams/architecture_etl_hr.drawio`](img/architecture_etl_hr.drawio)
 
 ---
 
